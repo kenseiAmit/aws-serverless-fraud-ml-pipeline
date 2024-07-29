@@ -1,0 +1,6 @@
+fastapi
+numpy
+pydantic
+pyspark==3.3.1
+uvicorn
+boto3
