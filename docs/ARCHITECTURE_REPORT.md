@@ -25,13 +25,13 @@
 ## 3. Verified Production Execution Evidence
 
 ### AWS Glue Distributed Spark MLlib Training (`2m 01s`, `0.1344 DPU-Hours`)
-![AWS Glue Training Job](evidence/table2_glue_training_job.png)
+![AWS Glue Training Job](../evidence/table2_glue_training_job.png)
 
 ### Serialized Spark MLlib `PipelineModel` Stages in Amazon S3
-![S3 Model Artifact](evidence/table3_s3_model_artifact.png)
+![S3 Model Artifact](../evidence/table3_s3_model_artifact.png)
 
 ### Live Amazon ECS Fargate Service & Real-Time `/health` + `/predict/` Verification
-![ECS Fargate Prediction API](evidence/table4_ecs_prediction_api.png)
+![ECS Fargate Prediction API](../evidence/table4_ecs_prediction_api.png)
 
 ### S3 Event-Driven AWS Lambda Retraining & Batch Archival
-![Lambda Retraining Workflow](evidence/table5_lambda_retraining.png)
+![Lambda Retraining Workflow](../evidence/table5_lambda_retraining.png)
