@@ -1,9 +1,13 @@
-# Cloud-Native Credit Card Fraud Detection & Retraining Pipeline on AWS
+<div align="center">
+  <img src="assets/hero-banner.svg" alt="AWS Serverless Fraud ML Pipeline" width="100%" />
+  <br/><br/>
+  ![AWS Glue](https://img.shields.io/badge/Training-AWS%20Glue%204.0%20PySpark%20MLlib-FF9900?style=flat-square&logo=amazonaws&logoColor=white)
+  ![ECS Fargate](https://img.shields.io/badge/Serving-ECS%20Fargate%20%2B%20FastAPI-2563EB?style=flat-square&logo=fastapi&logoColor=white)
+  ![Speedup](https://img.shields.io/badge/Spark%20Training-10x%20Faster%20(121s)-16A34A?style=flat-square)
+  ![License](https://img.shields.io/badge/License-MIT-slate?style=flat-square)
+</div>
 
-![AWS Glue](https://img.shields.io/badge/Training-AWS%20Glue%204.0%20PySpark%20MLlib-FF9900?style=flat-square&logo=amazonaws&logoColor=white)
-![ECS Fargate](https://img.shields.io/badge/Serving-ECS%20Fargate%20%2B%20FastAPI-2563EB?style=flat-square&logo=fastapi&logoColor=white)
-![Speedup](https://img.shields.io/badge/Spark%20Training-10x%20Faster%20(121s)-16A34A?style=flat-square)
-![License](https://img.shields.io/badge/License-MIT-slate?style=flat-square)
+---
 
 Production AWS machine learning platform migrating local PySpark credit card fraud detection (`284,807` transactions, severe `0.17%` fraud imbalance) to **serverless AWS Glue 4.0 distributed MLlib training**, **S3 event-driven AWS Lambda automated retraining & compliance archival**, and an **Amazon ECS Fargate FastAPI + PySpark real-time inference microservice**.
 
