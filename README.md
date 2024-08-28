@@ -1,57 +1,84 @@
 # Cloud-Native Credit Card Fraud Detection & Retraining Pipeline on AWS
 
-Serverless and containerized AWS machine learning platform migrating an on-premises PySpark credit card fraud workflow (`284,807` transactions, `0.17%` positive fraud class) to **AWS Glue 4.0** distributed Spark MLlib training, **S3-triggered AWS Lambda** automated retraining & compliance archival, and an **Amazon ECS Fargate** FastAPI + PySpark real-time inference microservice.
+![AWS Glue](https://img.shields.io/badge/Training-AWS%20Glue%204.0%20PySpark%20MLlib-FF9900?style=flat-square&logo=amazonaws&logoColor=white)
+![ECS Fargate](https://img.shields.io/badge/Serving-ECS%20Fargate%20%2B%20FastAPI-2563EB?style=flat-square&logo=fastapi&logoColor=white)
+![Speedup](https://img.shields.io/badge/Spark%20Training-10x%20Faster%20(121s)-16A34A?style=flat-square)
+![License](https://img.shields.io/badge/License-MIT-slate?style=flat-square)
+
+Production AWS machine learning platform migrating local PySpark credit card fraud detection (`284,807` transactions, severe `0.17%` fraud imbalance) to **serverless AWS Glue 4.0 distributed MLlib training**, **S3 event-driven AWS Lambda automated retraining & compliance archival**, and an **Amazon ECS Fargate FastAPI + PySpark real-time inference microservice**.
+
+![Glue Spark Optimization & Telemetry](evidence/glue_spark_caching_benchmark.png)
 
 ---
 
-## Key Performance & Engineering Highlights
+## 1. Event-Driven Serverless & Containerized Architecture
 
-- **`10×` Distributed Spark Training Speedup (`>20m` → `121s`)**: Repartitioning and in-memory caching (`.repartition(16).cache()`) with single-projection `DoubleType` casting and dynamic class-imbalance weighting across `4 × G.1X` AWS Glue workers (`0.1344 DPU-hours`).
-- **Zero-Idle-Cost Event-Driven Retraining**: Uploading a new transaction batch (e.g., [`data/incoming_transactions_batch3.csv`](data/incoming_transactions_batch3.csv)) to `s3://<bucket>/data/incoming/` triggers `refresh_function.lambda_handler`, archiving the batch with an immutable timestamp and launching an asynchronous AWS Glue retraining run.
-- **Credential-Less Containerized Inference**: FastAPI microservice (`fraud_detection_api/`) packaged with Python 3.10 + OpenJDK 17 + PySpark 3.3 dynamically downloads `model/fraud_detection_model_latest/` from S3 via its attached ECS IAM Task Role and serves Pydantic-validated `POST /predict/` requests.
-
-See [`docs/ARCHITECTURE_REPORT.md`](docs/ARCHITECTURE_REPORT.md) for full service rationale, IAM role architecture, and verified AWS deployment telemetry.
-
----
-
-## Repository Layout
-
-```text
-aws-serverless-fraud-ml-pipeline/
-├── fraud_detection_pipeline/
-│   ├── fraud_detector_model_trainer.py  # AWS Glue 4.0 distributed Spark MLlib trainer
-│   └── Pipfile
-├── refresh_function/
-│   ├── refresh_function.py              # S3 ObjectCreated -> archive + Glue trigger Lambda
-│   └── Pipfile
-├── fraud_detection_api/
-│   ├── main.py                          # FastAPI + PySpark real-time inference microservice
-│   ├── Dockerfile                       # Python 3.10 + headless OpenJDK 17 container image
-│   ├── requirements.txt
-│   └── model/fraud_detection_model_latest/ # Serialized Spark PipelineModel artifact
-├── ecs/
-│   └── fraud-detection-task-def.json    # AWS Fargate (1024 CPU / 2048 MB) task definition
-├── data/
-│   └── incoming_transactions_batch3.csv # Sample 30-feature streaming batch (Time, V1..V28, Amount)
-├── docs/
-│   └── ARCHITECTURE_REPORT.md           # Full cloud architecture, IAM matrix & runbook
-└── evidence/                            # Verified Glue, S3, ECS Fargate, Lambda & IAM captures
+```mermaid
+flowchart LR
+    A["S3 Data Lake<br/>data/incoming/*.csv"] -->|"s3:ObjectCreated:*"| B["AWS Lambda<br/>refresh_function.py"]
+    B -->|"Archive + Timestamp"| C["S3 Compliance Archive<br/>data/archive/*_retrain_ts.csv"]
+    B -->|"glue:StartJobRun"| D["AWS Glue 4.0 (4x G.1X)<br/>.repartition(16).cache() + RF"]
+    D -->|"Write PipelineModel"| E["S3 Model Registry<br/>model/fraud_detection_model_latest/"]
+    E -->|"IAM Task Role Startup Pull"| F["Amazon ECS Fargate<br/>FastAPI + OpenJDK 17 + PySpark"]
+    G["Client / Payment Gateway"] -->|"POST /predict/"| F
 ```
 
 ---
 
-## Local Container & API Quick Start
+## 2. Verified AWS Production Execution Gallery
+
+| AWS Glue 4.0 Distributed Training (`2m 01s`, `0.1344 DPU-h`) | Serialized Spark MLlib `PipelineModel` in S3 |
+| :---: | :---: |
+| ![Glue Training Job](evidence/table2_glue_training_job.png) | ![S3 Model Artifact](evidence/table3_s3_model_artifact.png) |
+
+| Amazon ECS Fargate Service & Live `curl /predict/` | S3 Event-Triggered Lambda Retraining & Archival |
+| :---: | :---: |
+| ![ECS Fargate Prediction API](evidence/table4_ecs_prediction_api.png) | ![Lambda Retraining](evidence/table5_lambda_retraining.png) |
+
+| IAM Roles: AWS Glue & AWS Lambda | IAM Task & Execution Role: Amazon ECS Fargate |
+| :---: | :---: |
+| ![IAM Glue & Lambda](evidence/table7_iam_glue_lambda.png) | ![IAM ECS](evidence/table8_iam_ecs.png) |
+
+Full architectural trade-offs and IAM policy matrices are documented in [`docs/ARCHITECTURE_REPORT.md`](docs/ARCHITECTURE_REPORT.md).
+
+---
+
+## 3. Live ECS Fargate Inference Verification
+
+```json
+// GET /health -> HTTP 200 OK
+{
+  "status": "healthy",
+  "model_loaded": true,
+  "spark_version": "3.3.0"
+}
+
+// POST /predict/ -> HTTP 200 OK
+{
+  "prediction": 0.0,
+  "is_fraud": false
+}
+```
+
+---
+
+## 4. Repository Structure & Local Docker Quick Start
+
+```text
+aws-serverless-fraud-ml-pipeline/
+├── fraud_detection_pipeline/            # AWS Glue 4.0 PySpark MLlib trainer (VectorAssembler + StandardScaler + RF)
+├── refresh_function/                    # AWS Lambda S3 event archival & Glue job trigger
+├── fraud_detection_api/                 # FastAPI + PySpark + OpenJDK 17 inference container & serialized model
+├── ecs/fraud-detection-task-def.json    # AWS Fargate (1024 CPU / 2048 MB) task definition
+├── data/incoming_transactions_batch3.csv# Sample 30-feature streaming batch (Time, V1..V28, Amount)
+├── docs/ARCHITECTURE_REPORT.md          # Complete AWS service rationale & IAM role matrix
+└── evidence/                            # Verified AWS Console, CloudWatch & live API screenshots
+```
 
 ```bash
-# Build and run the FastAPI + PySpark inference microservice locally
 docker build -t fraud-detection-api ./fraud_detection_api
 docker run -p 8000:8000 fraud-detection-api
-
-# Health & readiness check
 curl http://localhost:8000/health
-
-# Score a real-time credit card transaction
-curl -X POST http://localhost:8000/predict/   -H "Content-Type: application/json"   -d '{"Time": 406.0, "V1": -2.3122, "V2": 1.9519, "V3": -1.6098, "V4": 3.9979, "V5": -0.5221, "V6": -1.4265, "V7": -2.5373, "V8": 1.3916, "V9": -2.7700, "V10": -2.7722, "V11": 3.2020, "V12": -2.8999, "V13": -0.5952, "V14": -4.2892, "V15": 0.3897, "V16": -1.1407, "V17": -2.8300, "V18": -0.0168, "V19": 0.4169, "V20": 0.1269, "V21": 0.5172, "V22": -0.0350, "V23": -0.4652, "V24": 0.3201, "V25": 0.0445, "V26": 0.1778, "V27": 0.2611, "V28": -0.1432, "Amount": 0.0}'
 ```
 
 ## License
