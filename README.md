@@ -1,10 +1,12 @@
 <div align="center">
   <img src="assets/hero-banner.svg" alt="AWS Serverless Fraud ML Pipeline" width="100%" />
   <br/><br/>
-  ![AWS Glue](https://img.shields.io/badge/Training-AWS%20Glue%204.0%20PySpark%20MLlib-FF9900?style=flat-square&logo=amazonaws&logoColor=white)
-  ![ECS Fargate](https://img.shields.io/badge/Serving-ECS%20Fargate%20%2B%20FastAPI-2563EB?style=flat-square&logo=fastapi&logoColor=white)
-  ![Speedup](https://img.shields.io/badge/Spark%20Training-10x%20Faster%20(121s)-16A34A?style=flat-square)
-  ![License](https://img.shields.io/badge/License-MIT-slate?style=flat-square)
+  <p>
+    <img src="https://img.shields.io/badge/Training-AWS%20Glue%204.0%20PySpark%20MLlib-FF9900?style=flat-square&amp;logo=amazonaws&amp;logoColor=white" alt="AWS Glue" />
+    <img src="https://img.shields.io/badge/Serving-ECS%20Fargate%20%2B%20FastAPI-2563EB?style=flat-square&amp;logo=fastapi&amp;logoColor=white" alt="ECS Fargate" />
+    <img src="https://img.shields.io/badge/Spark%20Training-10x%20Faster%20%28121s%29-16A34A?style=flat-square" alt="Speedup" />
+    <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-475569?style=flat-square" alt="License" /></a>
+  </p>
 </div>
 
 ---
