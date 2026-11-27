@@ -11,6 +11,8 @@
 
 ---
 
+![AWS Glue 4.0 PySpark & Serverless Fraud ML Pipeline Blueprint](docs/images/architecture_blueprint.png)
+
 Production AWS machine learning platform migrating local PySpark credit card fraud detection (`284,807` transactions, severe `0.17%` fraud imbalance) to **serverless AWS Glue 4.0 distributed MLlib training**, **S3 event-driven AWS Lambda automated retraining & compliance archival**, and an **Amazon ECS Fargate FastAPI + PySpark real-time inference microservice**.
 
 ![Glue Spark Optimization & Telemetry](evidence/glue_spark_caching_benchmark.png)
